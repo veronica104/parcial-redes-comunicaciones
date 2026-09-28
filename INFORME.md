@@ -2,8 +2,7 @@
 
 ## Sección 1: Topología y Flujo de Información
 
-*(Inserta aquí el diagrama de arquitectura — puedes reutilizar el del enunciado o
-regenerarlo con tus propios nombres de servicio/redes/puertos.)*
+ ![Arquitectura del stack multi-contenedor](./capturas/07-arquitectura.svg)
 
 Flujo resumido:
 1. El navegador del usuario solo conoce **un punto de entrada**: `nginx:80`.
