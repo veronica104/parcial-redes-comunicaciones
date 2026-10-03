@@ -19,6 +19,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: "trust" # Permite conexiones internas sin exigir contraseña
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
@@ -28,6 +29,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
   joomla:
     image: joomla:latest
     container_name: joomla
@@ -47,6 +49,7 @@ services:
     networks:
       - frontend_net
       - backend_net
+
   jupyter:
     image: jupyter/minimal-notebook:latest
     container_name: jupyter
@@ -54,7 +57,6 @@ services:
     depends_on:
       - database
     environment:
-      JUPYTER_TOKEN: ${JUPYTER_TOKEN}
       POSTGRES_HOST: database
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -64,8 +66,10 @@ services:
     networks:
       - frontend_net
       - backend_net
+    # Desactiva los tokens de autenticación
     command: >
-      start-notebook.sh --NotebookApp.base_url=/jupyter --NotebookApp.token=${JUPYTER_TOKEN}
+      start-notebook.sh --NotebookApp.base_url=/jupyter --NotebookApp.token='' --IdentityProvider.token=''
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -73,8 +77,10 @@ services:
     depends_on:
       - database
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"        # Habilita el acceso anónimo
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"       # Otorga permisos de Administrador directo
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"       # Oculta la pantalla de Inicio de Sesión
       GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana/"
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
     volumes:
@@ -84,6 +90,7 @@ services:
     networks:
       - frontend_net
       - backend_net
+
   nginx:
     image: nginx:alpine
     container_name: nginx
